@@ -15,10 +15,18 @@
   --brand-primary-faint:  rgba(124, 58, 237, 0.06);
   --brand-primary-glow:   rgba(124, 58, 237, 0.22);
 
+  /* Aliases for convenience */
+  --brand-purple:         #7c3aed;
+  --brand-purple-light:   #a78bfa;
+
   --brand-indigo:         #6366f1;
   --brand-indigo-deep:    #4f46e5;
   --brand-indigo-faint:   rgba(99, 102, 241, 0.06);
   --brand-indigo-glow:    rgba(99, 102, 241, 0.22);
+
+  --brand-cyan:           #22d3ee;
+  --brand-cyan-deep:      #06b6d4;
+  --brand-cyan-faint:     rgba(6, 182, 212, 0.06);
 
   --brand-rose:           #f43f5e;
   --brand-rose-deep:      #e11d48;
@@ -842,6 +850,7 @@ body.dark-theme .form-input:focus, body.dark-theme .form-select:focus, body.dark
 body.dark-theme .form-input::placeholder, body.dark-theme .form-textarea::placeholder { color:#2d2550; }
 .form-select { cursor:pointer; -webkit-appearance:none; appearance:none; }
 select option { background:var(--bg-card-solid); color:var(--text-primary); padding:10px; }
+body.dark-theme select option { background:#0f0f1a; color:#f0eeff; }
 .form-textarea { resize:vertical; min-height:80px; line-height:1.6; }
 
 .input-p {
@@ -854,6 +863,22 @@ select option { background:var(--bg-card-solid); color:var(--text-primary); padd
 .input-p:focus { border-color:rgba(124,58,237,0.52); box-shadow:0 0 0 3px rgba(124,58,237,0.09); }
 .input-p::placeholder { color:var(--text-placeholder); }
 body.dark-theme .input-p { background:#0f0f1a; border-color:rgba(124,58,237,0.16); color:#f0eeff; }
+
+/* Appointment Card */
+.apt-card {
+  background:var(--bg-card); border:1px solid var(--border-subtle);
+  border-radius:var(--radius-xl); padding:18px;
+  display:flex; flex-direction:column; gap:12px;
+  transition:all var(--t-fast); box-shadow:var(--shadow-xs);
+}
+.apt-card:hover { border-color:var(--border-brand); box-shadow:var(--shadow-sm); }
+body.dark-theme .apt-card {
+  background:linear-gradient(145deg, #0d0d18, #090912);
+  border-color:rgba(124,58,237,0.12);
+  box-shadow:var(--shadow-sm), inset 0 1px 0 rgba(124,58,237,0.07);
+}
+body.dark-theme .apt-card:hover { border-color:rgba(124,58,237,0.28); }
+
 
 /* ═══════════════════════════════════════════════════════════════
    DATA TABLES — PREMIUM DARK

@@ -10,13 +10,20 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [statsError, setStatsError] = useState(false);
 
   useEffect(() => {
     authApi.dashboardStats()
-      .then((r) => setStats(r.data.stats || r.data))
-      .catch(() => {})
+      .then((r) => {
+        // API returns a flat object directly
+        const data = r.data;
+        setStats(data.stats || data);
+        setStatsError(false);
+      })
+      .catch(() => setStatsError(true))
       .finally(() => setLoading(false));
   }, []);
+
 
   const statCards = [
     {
@@ -50,6 +57,14 @@ export default function AdminDashboard() {
       color: '#fb7185',
       bg: 'rgba(225,29,72,0.12)',
       sub: 'total predictions',
+    },
+    {
+      label: 'Appointments',
+      value: stats?.total_appointments ?? 0,
+      icon: Calendar,
+      color: '#f59e0b',
+      bg: 'rgba(245,158,11,0.12)',
+      sub: `${stats?.pending_appointments ?? 0} pending`,
     },
   ];
 
@@ -201,19 +216,23 @@ export default function AdminDashboard() {
           </div>
 
           {/* System health */}
-          <div className="card" style={{ background: 'rgba(16,185,129,0.04)', borderColor: 'rgba(16,185,129,0.18)' }}>
+          <div className="card" style={{ background: statsError ? 'rgba(225,29,72,0.04)' : 'rgba(16,185,129,0.04)', borderColor: statsError ? 'rgba(225,29,72,0.18)' : 'rgba(16,185,129,0.18)' }}>
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
               <div style={{
                 width: 40, height: 40, borderRadius: 10,
-                background: 'rgba(16,185,129,0.12)', flexShrink: 0,
+                background: statsError ? 'rgba(225,29,72,0.12)' : 'rgba(16,185,129,0.12)', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <Activity style={{ width: 18, height: 18, color: '#10b981' }} />
+                <Activity style={{ width: 18, height: 18, color: statsError ? '#e11d48' : '#10b981' }} />
               </div>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#059669' }}>All Systems Operational</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: statsError ? '#e11d48' : '#059669' }}>
+                  {statsError ? '⚠️ Stats API Unreachable' : 'All Systems Operational'}
+                </div>
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3, lineHeight: 1.5 }}>
-                  Backend API, ML Engine & database connections are healthy.
+                  {statsError
+                    ? 'Could not reach backend. Ensure the Django server is running on port 8000.'
+                    : 'Backend API, ML Engine & database connections are healthy.'}
                 </p>
               </div>
             </div>

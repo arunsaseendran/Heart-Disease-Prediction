@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { doctorApi } from '../../../lib/api';
-import { FileText, Calendar, Plus, Heart, Clipboard, Clock, RefreshCcw } from 'lucide-react';
+import { doctorApi, reportApi } from '../../../lib/api';
+import { FileText, Calendar, Plus, Clipboard, Clock, RefreshCcw, Download } from 'lucide-react';
 
 export default function MyPrescriptions() {
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState<number | null>(null);
 
   const loadData = () => {
     setLoading(true);
@@ -12,6 +13,25 @@ export default function MyPrescriptions() {
       .then((r) => setPrescriptions(r.data.results || r.data))
       .catch(() => {})
       .finally(() => setLoading(false));
+  };
+
+  const handleDownload = async (id: number, patientName: string) => {
+    setDownloading(id);
+    try {
+      const res = await reportApi.downloadPrescription(id);
+      const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `prescription_${id}_${patientName.replace(/\s+/g, '_')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('Failed to download prescription PDF. Please try again.');
+    } finally {
+      setDownloading(null);
+    }
   };
 
   useEffect(() => { loadData(); }, []);
@@ -101,6 +121,19 @@ export default function MyPrescriptions() {
                       Follow-up: {new Date(rx.follow_up_date).toLocaleDateString('en-IN', { dateStyle: 'medium' })}
                     </span>
                   )}
+                  <button
+                    onClick={() => handleDownload(rx.id, rx.doctor_name || 'doctor')}
+                    disabled={downloading === rx.id}
+                    className="btn btn-ghost btn-sm"
+                    style={{ fontSize: 11, gap: 5, marginTop: 2 }}
+                    title="Download Prescription PDF"
+                  >
+                    {downloading === rx.id ? (
+                      <><div className="spinner" style={{ width: 11, height: 11, borderWidth: 2 }} /> Downloading...</>
+                    ) : (
+                      <><Download style={{ width: 12, height: 12 }} /> Download Rx PDF</>
+                    )}
+                  </button>
                 </div>
               </div>
 

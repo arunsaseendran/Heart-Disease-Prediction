@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { doctorApi } from '../../../lib/api';
-import { FileText, Plus, Calendar, ClipboardList, CheckCircle, AlertCircle, RefreshCcw } from 'lucide-react';
+import { doctorApi, reportApi } from '../../../lib/api';
+import { FileText, Plus, Calendar, ClipboardList, CheckCircle, AlertCircle, RefreshCcw, Download } from 'lucide-react';
+import StyledSelect from '../../components/StyledSelect';
 
 export default function DoctorPrescriptions() {
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
@@ -9,6 +10,7 @@ export default function DoctorPrescriptions() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [downloading, setDownloading] = useState<number | null>(null);
 
   // Form state
   const [form, setForm] = useState({
@@ -74,6 +76,25 @@ export default function DoctorPrescriptions() {
     }
   };
 
+  const handleDownload = async (id: number, patientName: string) => {
+    setDownloading(id);
+    try {
+      const res = await reportApi.downloadPrescription(id);
+      const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `prescription_${id}_${patientName.replace(/\s+/g, '_')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('Could not download prescription PDF.');
+    } finally {
+      setDownloading(null);
+    }
+  };
+
   return (
     <div style={{ maxWidth: 'var(--content-max)', margin: '0 auto', display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 32 }} className="stagger">
       
@@ -109,17 +130,16 @@ export default function DoctorPrescriptions() {
             <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 14 }}>
               <div className="form-group">
                 <label className="form-label">Select Patient</label>
-                <select
+                <StyledSelect
                   value={form.patient_id}
-                  onChange={(e) => setForm({ ...form, patient_id: e.target.value })}
-                  className="form-select"
+                  onChange={(v) => setForm({ ...form, patient_id: v })}
+                  placeholder="-- Choose Patient --"
                   required
-                >
-                  <option value="">-- Choose Patient --</option>
-                  {patients.map(p => (
-                    <option key={p.id} value={p.id}>{p.patient_name || `Patient #${p.id}`} (Blood: {p.blood_group || 'N/A'})</option>
-                  ))}
-                </select>
+                  options={patients.map(p => ({
+                    value: String(p.id),
+                    label: `${p.patient_name || `Patient #${p.id}`} (Blood: ${p.blood_group || 'N/A'})`
+                  }))}
+                />
               </div>
 
               <div className="form-group">
@@ -242,10 +262,25 @@ export default function DoctorPrescriptions() {
                   <span style={{ fontSize: 11.5, color: 'var(--text-muted)', fontWeight: 800 }}>
                     Rx ID Reference: #{rx.id}
                   </span>
-                  <span className="info-chip" style={{ fontSize: 10.5, padding: '3px 8px' }}>
-                    <Calendar style={{ width: 11, height: 11 }} />
-                    {new Date(rx.created_at).toLocaleDateString('en-IN', { dateStyle: 'medium' })}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span className="info-chip" style={{ fontSize: 10.5, padding: '3px 8px' }}>
+                      <Calendar style={{ width: 11, height: 11 }} />
+                      {new Date(rx.created_at).toLocaleDateString('en-IN', { dateStyle: 'medium' })}
+                    </span>
+                    <button
+                      onClick={() => handleDownload(rx.id, rx.patient_name || `patient_${rx.patient}`)}
+                      disabled={downloading === rx.id}
+                      className="btn btn-ghost btn-sm"
+                      style={{ fontSize: 10.5, padding: '4px 10px', gap: 5 }}
+                      title="Download Prescription PDF"
+                    >
+                      {downloading === rx.id ? (
+                        <><div className="spinner" style={{ width: 10, height: 10, borderWidth: 2 }} /> Downloading...</>
+                      ) : (
+                        <><Download style={{ width: 11, height: 11 }} /> Rx PDF</>
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>

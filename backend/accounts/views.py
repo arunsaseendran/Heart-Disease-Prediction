@@ -7,6 +7,7 @@ from .serializers import (
     RegisterSerializer, LoginSerializer,
     UserSerializer, ChangePasswordSerializer,
 )
+from .permissions import IsAdminRole
 
 
 class RegisterView(generics.CreateAPIView):
@@ -57,20 +58,20 @@ class ChangePasswordView(APIView):
 class AdminUserListView(generics.ListAPIView):
     """Admin: List all users"""
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminRole]
     queryset = User.objects.all().order_by("-created_at")
 
 
 class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
     """Admin: Manage individual users"""
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminRole]
     queryset = User.objects.all()
 
 
 class AdminToggleUserView(APIView):
     """Admin: Activate/deactivate user accounts"""
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminRole]
 
     def post(self, request, pk):
         try:
@@ -87,13 +88,18 @@ class AdminToggleUserView(APIView):
 
 class DashboardStatsView(APIView):
     """Admin: Dashboard statistics"""
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminRole]
 
     def get(self, request):
         from predictions.models import Prediction
         from appointments.models import Appointment
 
         stats = {
+            "total_users": User.objects.count(),
+            "patients_count": User.objects.filter(role="patient").count(),
+            "doctors_count": User.objects.filter(role="doctor").count(),
+            "predictions_count": Prediction.objects.count(),
+            # Fallbacks
             "total_patients": User.objects.filter(role="patient").count(),
             "total_doctors": User.objects.filter(role="doctor").count(),
             "total_predictions": Prediction.objects.count(),

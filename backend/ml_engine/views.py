@@ -6,6 +6,7 @@ from rest_framework import serializers
 from .models import MLModel, Dataset
 from .engine import train_all_models, get_training_results, predict as ml_predict
 import pandas as pd
+from accounts.permissions import IsAdminRole
 
 
 class MLModelSerializer(serializers.ModelSerializer):
@@ -22,7 +23,7 @@ class DatasetSerializer(serializers.ModelSerializer):
 
 class TrainModelsView(APIView):
     """Admin: Train all ML models"""
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminRole]
 
     def post(self, request):
         try:
@@ -83,7 +84,7 @@ class ModelListView(generics.ListAPIView):
 
 class DatasetUploadView(APIView):
     """Admin: Upload training dataset"""
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminRole]
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
@@ -104,6 +105,6 @@ class DatasetUploadView(APIView):
 
 
 class DatasetListView(generics.ListAPIView):
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminRole]
     serializer_class = DatasetSerializer
     queryset = Dataset.objects.all()

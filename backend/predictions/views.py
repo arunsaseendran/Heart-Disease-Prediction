@@ -5,6 +5,7 @@ from .models import Prediction
 from .serializers import PredictionSerializer, PredictRequestSerializer
 from patients.models import PatientProfile, HealthRecord
 from ml_engine.engine import predict as ml_predict, get_recommendations
+from accounts.permissions import IsAdminRole
 
 
 class PredictView(APIView):
@@ -32,9 +33,15 @@ class PredictView(APIView):
         if request.user.role == "patient" and data.get("save_record", True):
             profile, _ = PatientProfile.objects.get_or_create(user=request.user)
 
+            # Update blood group if provided
+            blood_group = data.get("blood_group")
+            if blood_group:
+                profile.blood_group = blood_group
+                profile.save()
+
             # Save health record
             health_fields = {k: v for k, v in data.items()
-                             if k not in ["algorithm", "save_record", "smoking"]}
+                             if k not in ["algorithm", "save_record", "smoking", "blood_group"]}
             health_fields["smoking"] = data.get("smoking", False)
             health_record = HealthRecord.objects.create(patient=profile, **health_fields)
 
@@ -97,7 +104,7 @@ class PredictionDetailView(generics.RetrieveAPIView):
 
 class AdminPredictionStatsView(APIView):
     """Admin: Overall prediction statistics"""
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminRole]
 
     def get(self, request):
         total = Prediction.objects.count()
@@ -105,10 +112,17 @@ class AdminPredictionStatsView(APIView):
         medium = Prediction.objects.filter(risk_level="medium").count()
         low = Prediction.objects.filter(risk_level="low").count()
 
+        recent_preds = Prediction.objects.all().order_by("-created_at")[:100]
+        recent_serialized = PredictionSerializer(recent_preds, many=True).data
+
         return Response({
             "total_predictions": total,
             "high_risk": high,
             "medium_risk": medium,
             "low_risk": low,
+            "high_risk_count": high,
+            "medium_risk_count": medium,
+            "low_risk_count": low,
             "high_risk_percentage": round((high / total * 100) if total else 0, 1),
+            "recent": recent_serialized,
         })

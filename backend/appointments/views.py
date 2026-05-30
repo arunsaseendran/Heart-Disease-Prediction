@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Appointment
 from .serializers import AppointmentSerializer
+from accounts.permissions import IsAdminRole
 from patients.models import PatientProfile
 from doctors.models import DoctorProfile
 
@@ -24,6 +25,10 @@ class PatientAppointmentListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         profile, _ = PatientProfile.objects.get_or_create(user=self.request.user)
+        blood_group = serializer.validated_data.pop("blood_group", None)
+        if blood_group:
+            profile.blood_group = blood_group
+            profile.save()
         serializer.save(patient=profile)
 
 
@@ -49,6 +54,11 @@ class DoctorAppointmentActionView(APIView):
             appt.doctor_notes = request.data.get("notes", "")
             appt.save()
 
+            if action == "confirm":
+                patient_profile = appt.patient
+                patient_profile.assigned_doctor = appt.doctor.user
+                patient_profile.save()
+
             # Notify patient
             from patients.models import Notification
             Notification.objects.create(
@@ -65,5 +75,5 @@ class DoctorAppointmentActionView(APIView):
 class AdminAppointmentListView(generics.ListAPIView):
     """Admin: View all appointments"""
     serializer_class = AppointmentSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminRole]
     queryset = Appointment.objects.all()

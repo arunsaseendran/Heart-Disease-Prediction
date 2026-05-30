@@ -128,7 +128,7 @@
     }
   },
   "best_model": "xgboost",
-  "trained_at": "2026-05-28T17:54:59.410015",
+  "trained_at": "2026-05-30T18:28:39.559100",
   "dataset_size": 1000,
   "features": [
     "age",

@@ -223,7 +223,7 @@ export default function LoginPage() {
                   onChange={e => setForm({ ...form, username: e.target.value })}
                   onFocus={() => setFocusedField('username')}
                   onBlur={() => setFocusedField(null)}
-                  placeholder="johndoe"
+                  placeholder="Enter username"
                   required
                   autoComplete="username"
                   style={{

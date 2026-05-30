@@ -16,7 +16,7 @@ export default function RegisterPage() {
   const [role, setRole] = useState<'patient' | 'doctor'>('patient');
   const [form, setForm] = useState({
     username: '', password: '', email: '', first_name: '', last_name: '',
-    age: '', gender: 'male', specialization: '', experience: '', hospital: '', consulting_fees: ''
+    age: '', gender: 'male', specialization: 'cardiologist', experience: '', hospital: '', consulting_fees: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -237,11 +237,11 @@ export default function RegisterPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 13 }}>
                 <div className="form-group">
                   <label className="form-label">First Name</label>
-                  <input type="text" value={form.first_name} onChange={e => setForm({ ...form, first_name: e.target.value })} placeholder="John" required className="form-input" />
+                  <input type="text" value={form.first_name} onChange={e => setForm({ ...form, first_name: e.target.value })} placeholder="Enter first name" required className="form-input" />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Last Name</label>
-                  <input type="text" value={form.last_name} onChange={e => setForm({ ...form, last_name: e.target.value })} placeholder="Doe" required className="form-input" />
+                  <input type="text" value={form.last_name} onChange={e => setForm({ ...form, last_name: e.target.value })} placeholder="Enter last name" required className="form-input" />
                 </div>
               </div>
 
@@ -249,20 +249,20 @@ export default function RegisterPage() {
                 <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                   <User style={{ width: 9, height: 9 }} /> Username
                 </label>
-                <input type="text" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} placeholder="johndoe" required className="form-input" />
+                <input type="text" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} placeholder="Enter username" required className="form-input" />
               </div>
 
               <div className="form-group">
                 <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                   <Mail style={{ width: 9, height: 9 }} /> Email Address
                 </label>
-                <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="john@example.com" required className="form-input" />
+                <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="Enter email address" required className="form-input" />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 13 }}>
                 <div className="form-group">
                   <label className="form-label">Age</label>
-                  <input type="number" min="1" max="120" value={form.age} onChange={e => setForm({ ...form, age: e.target.value })} placeholder="35" required className="form-input" />
+                  <input type="number" min="1" max="120" value={form.age} onChange={e => setForm({ ...form, age: e.target.value })} placeholder="Enter age" required className="form-input" />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Gender</label>
@@ -304,22 +304,34 @@ export default function RegisterPage() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 13 }}>
                     <div className="form-group">
                       <label className="form-label">Specialization</label>
-                      <input type="text" value={form.specialization} onChange={e => setForm({ ...form, specialization: e.target.value })} placeholder="Cardiologist" required className="form-input" />
+                      <Select value={form.specialization} onValueChange={v => setForm({ ...form, specialization: v })}>
+                        <SelectTrigger className="form-input">
+                          <SelectValue placeholder="Select specialization" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cardiologist">Cardiologist</SelectItem>
+                          <SelectItem value="general_physician">General Physician</SelectItem>
+                          <SelectItem value="internist">Internist</SelectItem>
+                          <SelectItem value="cardiac_surgeon">Cardiac Surgeon</SelectItem>
+                          <SelectItem value="electrophysiologist">Electrophysiologist</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="form-group">
                       <label className="form-label">Experience (Years)</label>
-                      <input type="number" value={form.experience} onChange={e => setForm({ ...form, experience: e.target.value })} placeholder="8" required className="form-input" />
+                      <input type="number" value={form.experience} onChange={e => setForm({ ...form, experience: e.target.value })} placeholder="Enter experience" required className="form-input" />
                     </div>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 13 }}>
                     <div className="form-group">
                       <label className="form-label">Hospital / Clinic</label>
-                      <input type="text" value={form.hospital} onChange={e => setForm({ ...form, hospital: e.target.value })} placeholder="Mayo Clinic" required className="form-input" />
+                      <input type="text" value={form.hospital} onChange={e => setForm({ ...form, hospital: e.target.value })} placeholder="Enter hospital / clinic" required className="form-input" />
                     </div>
                     <div className="form-group">
                       <label className="form-label">Consultation Fees (₹)</label>
-                      <input type="number" value={form.consulting_fees} onChange={e => setForm({ ...form, consulting_fees: e.target.value })} placeholder="800" required className="form-input" />
+                      <input type="number" value={form.consulting_fees} onChange={e => setForm({ ...form, consulting_fees: e.target.value })} placeholder="Enter consulting fee" required className="form-input" />
                     </div>
                   </div>
                 </div>

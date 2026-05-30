@@ -38,3 +38,4 @@ class PredictRequestSerializer(serializers.Serializer):
     smoking = serializers.BooleanField(default=False)
     algorithm = serializers.CharField(default="best", required=False)
     save_record = serializers.BooleanField(default=True)
+    blood_group = serializers.CharField(required=False, allow_blank=True, default="")

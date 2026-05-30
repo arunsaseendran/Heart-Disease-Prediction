@@ -130,7 +130,9 @@ export default function DoctorAppointments() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)' }}>
                     <Clock style={{ width: 14, height: 14, color: 'var(--brand-purple-light)' }} />
                     <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>
-                      {new Date(apt.appointment_date + 'T' + apt.appointment_time).toLocaleDateString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                      {new Date(apt.appointment_date + 'T00:00:00').toLocaleDateString('en-IN', { dateStyle: 'medium' })}
+                      {' · '}
+                      {apt.appointment_time}
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)' }}>

@@ -7,6 +7,7 @@ from .models import PatientProfile, HealthRecord, Notification
 class PatientProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     assigned_doctor_name = serializers.SerializerMethodField()
+    patient_name = serializers.SerializerMethodField()
 
     class Meta:
         model = PatientProfile
@@ -16,6 +17,9 @@ class PatientProfileSerializer(serializers.ModelSerializer):
         if obj.assigned_doctor:
             return obj.assigned_doctor.get_full_name() or obj.assigned_doctor.username
         return None
+
+    def get_patient_name(self, obj):
+        return obj.user.get_full_name() or obj.user.username
 
 
 class HealthRecordSerializer(serializers.ModelSerializer):

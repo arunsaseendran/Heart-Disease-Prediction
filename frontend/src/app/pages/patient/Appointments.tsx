@@ -1,13 +1,7 @@
 import { useState, useEffect } from 'react';
 import { appointmentApi, doctorApi } from '../../../lib/api';
 import { Calendar, Clock, AlertCircle, CheckCircle, Video, ClipboardList } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
+import StyledSelect from '../../components/StyledSelect';
 
 const statusConfig: Record<string, { bg: string; color: string; label: string; border: string }> = {
   pending:   { bg: 'rgba(245, 158, 11, 0.08)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.2)', label: 'Pending Approval' },
@@ -16,6 +10,17 @@ const statusConfig: Record<string, { bg: string; color: string; label: string; b
   completed: { bg: 'rgba(16, 185, 129, 0.08)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.2)', label: 'Completed' },
   cancelled: { bg: 'rgba(255, 255, 255, 0.04)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)', label: 'Cancelled' },
 };
+
+const bloodGroupOptions = [
+  { value: 'A+', label: 'A+' },
+  { value: 'A-', label: 'A-' },
+  { value: 'B+', label: 'B+' },
+  { value: 'B-', label: 'B-' },
+  { value: 'AB+', label: 'AB+' },
+  { value: 'AB-', label: 'AB-' },
+  { value: 'O+', label: 'O+' },
+  { value: 'O-', label: 'O-' },
+];
 
 export default function PatientAppointments() {
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -31,6 +36,7 @@ export default function PatientAppointments() {
     appointment_date: '',
     appointment_time: '',
     reason: '',
+    blood_group: '',
   });
 
   const loadData = () => {
@@ -60,10 +66,11 @@ export default function PatientAppointments() {
         doctor: parseInt(form.doctor_id),
         appointment_date: form.appointment_date,
         appointment_time: form.appointment_time,
-        reason: form.reason
+        reason: form.reason,
+        blood_group: form.blood_group,
       });
       setSuccess(true);
-      setForm({ doctor_id: '', appointment_date: '', appointment_time: '', reason: '' });
+      setForm({ doctor_id: '', appointment_date: '', appointment_time: '', reason: '', blood_group: '' });
       // Reload appointments list
       appointmentApi.list().then((r) => setAppointments(r.data.results || r.data));
     } catch (err: any) {
@@ -104,24 +111,31 @@ export default function PatientAppointments() {
           )}
 
           <form onSubmit={handleBook} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div className="form-group">
-              <label className="form-label">Select Specialist</label>
-              <Select
-                value={String(form.doctor_id)}
-                onValueChange={(v) => setForm({ ...form, doctor_id: v })}
-                required
-              >
-                <SelectTrigger className="form-select">
-                  <SelectValue placeholder="-- Choose Cardiologist --" />
-                </SelectTrigger>
-                <SelectContent>
-                  {doctors.map((doc) => (
-                    <SelectItem key={doc.id} value={String(doc.id)}>
-                      Dr. {doc.user?.first_name ? `${doc.user.first_name} ${doc.user.last_name || ''}`.trim() : (doc.user?.username || 'Unknown')} ({doc.specialization_display || doc.specialization})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 14 }}>
+              <div className="form-group">
+                <label className="form-label">Select Specialist</label>
+                <StyledSelect
+                  value={form.doctor_id}
+                  onChange={(v) => setForm({ ...form, doctor_id: v })}
+                  placeholder="-- Choose Specialist --"
+                  required
+                  options={doctors.map((doc) => ({
+                    value: String(doc.id),
+                    label: `Dr. ${doc.user?.first_name ? `${doc.user.first_name} ${doc.user.last_name || ''}`.trim() : (doc.user?.username || 'Unknown')} (${doc.specialization_display || doc.specialization})`,
+                  }))}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Blood Group</label>
+                <StyledSelect
+                  value={form.blood_group}
+                  onChange={(v) => setForm({ ...form, blood_group: v })}
+                  placeholder="-- Blood Group --"
+                  required
+                  options={bloodGroupOptions}
+                />
+              </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>

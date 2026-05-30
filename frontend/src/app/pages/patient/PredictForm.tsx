@@ -50,6 +50,7 @@ export default function PredictForm() {
     thalassemia: 1,
     smoking: false,
     algorithm: 'best',
+    blood_group: 'A+',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,14 +98,15 @@ export default function PredictForm() {
   };
 
   const handleDownloadPDF = () => {
-    if (!result?.id) return;
+    const reportId = result?.prediction_id || result?.id;
+    if (!reportId) return;
     setPdfDownloading(true);
-    reportApi.generate(result.id)
+    reportApi.generate(reportId)
       .then((r) => {
         const blob = new Blob([r.data], { type: 'application/pdf' });
         const link = document.createElement('a');
         link.href = window.URL.createObjectURL(blob);
-        link.download = `HeartCare_AI_Assessment_${result.id}.pdf`;
+        link.download = `HeartCare_AI_Assessment_${reportId}.pdf`;
         link.click();
       })
       .catch(() => alert('Failed to download PDF.'))
@@ -198,6 +200,24 @@ export default function PredictForm() {
                     <SelectContent>
                       <SelectItem value="no">Non-Smoker</SelectItem>
                       <SelectItem value="yes">Active Smoker</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Blood Group</label>
+                  <Select value={form.blood_group} onValueChange={v => setForm({ ...form, blood_group: v })}>
+                    <SelectTrigger className="form-select">
+                      <SelectValue placeholder="Blood Group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="A+">A+</SelectItem>
+                      <SelectItem value="A-">A-</SelectItem>
+                      <SelectItem value="B+">B+</SelectItem>
+                      <SelectItem value="B-">B-</SelectItem>
+                      <SelectItem value="AB+">AB+</SelectItem>
+                      <SelectItem value="AB-">AB-</SelectItem>
+                      <SelectItem value="O+">O+</SelectItem>
+                      <SelectItem value="O-">O-</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

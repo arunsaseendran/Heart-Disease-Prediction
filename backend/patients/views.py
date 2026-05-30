@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import PatientProfile, HealthRecord, Notification
 from .serializers import PatientProfileSerializer, HealthRecordSerializer, NotificationSerializer
+from accounts.permissions import IsAdminRole
 
 
 class IsPatient(permissions.BasePermission):
@@ -44,7 +45,7 @@ class PatientDetailView(generics.RetrieveAPIView):
 
 class AssignDoctorView(APIView):
     """Admin: Assign a doctor to a patient"""
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminRole]
 
     def post(self, request, pk):
         try:

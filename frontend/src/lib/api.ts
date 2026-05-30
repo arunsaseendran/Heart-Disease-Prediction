@@ -90,6 +90,10 @@ export const doctorApi = {
     api.patch('/doctors/profile/', data),
   adminCreate: (data: Record<string, unknown>) =>
     api.post('/doctors/admin/create/', data),
+  adminPending: () =>
+    api.get('/doctors/admin/pending/'),
+  adminApprove: (id: number, data: Record<string, unknown>) =>
+    api.post(`/doctors/admin/approve/${id}/`, data),
   availability: () => api.get('/doctors/availability/'),
   updateAvailability: (data: Record<string, unknown>) =>
     api.patch('/doctors/availability/', data),
@@ -126,7 +130,9 @@ export const appointmentApi = {
 // ── Reports ───────────────────────────────────────────────────────────────────
 export const reportApi = {
   generate: (predictionId: number) =>
-    api.get(`/reports/generate/${predictionId}/`, { responseType: 'blob' }),
+    api.get(`/reports/download/${predictionId}/`, { responseType: 'blob' }),
+  downloadPrescription: (prescriptionId: number) =>
+    api.get(`/reports/prescription/${prescriptionId}/`, { responseType: 'blob' }),
 };
 
 // ── ML Engine ─────────────────────────────────────────────────────────────────

@@ -5,6 +5,7 @@ from .models import Appointment
 class AppointmentSerializer(serializers.ModelSerializer):
     patient_name = serializers.SerializerMethodField()
     doctor_name = serializers.SerializerMethodField()
+    blood_group = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     class Meta:
         model = Appointment

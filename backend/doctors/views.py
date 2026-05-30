@@ -5,6 +5,9 @@ from .models import DoctorProfile, DoctorAvailability, Prescription
 from .serializers import DoctorProfileSerializer, DoctorAvailabilitySerializer, PrescriptionSerializer
 from patients.models import PatientProfile
 from patients.serializers import PatientProfileSerializer
+from accounts.models import User
+from accounts.serializers import UserSerializer
+from accounts.permissions import IsAdminRole
 
 
 class IsDoctor(permissions.BasePermission):
@@ -13,10 +16,10 @@ class IsDoctor(permissions.BasePermission):
 
 
 class DoctorListView(generics.ListAPIView):
-    """Public: List all available doctors"""
+    """Public: List all approved and available doctors"""
     serializer_class = DoctorProfileSerializer
     permission_classes = [permissions.AllowAny]
-    queryset = DoctorProfile.objects.filter(is_available=True).select_related("user")
+    queryset = DoctorProfile.objects.filter(is_approved=True, is_available=True).select_related("user")
 
 
 class DoctorDetailView(generics.RetrieveAPIView):
@@ -33,7 +36,11 @@ class DoctorProfileView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         profile, _ = DoctorProfile.objects.get_or_create(
             user=self.request.user,
-            defaults={"license_number": f"LIC-{self.request.user.id}"},
+            defaults={
+                "license_number": f"LIC-{self.request.user.id}",
+                "is_available": False,
+                "is_approved": False,
+            },
         )
         return profile
 
@@ -41,7 +48,7 @@ class DoctorProfileView(generics.RetrieveUpdateAPIView):
 class AdminDoctorCreateView(generics.CreateAPIView):
     """Admin: Add a new doctor"""
     serializer_class = DoctorProfileSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminRole]
 
     def create(self, request, *args, **kwargs):
         # Create user first, then doctor profile
@@ -67,7 +74,42 @@ class AdminDoctorCreateView(generics.CreateAPIView):
             "hospital_name": request.data.get("hospital_name", ""),
             "consultation_fee": request.data.get("consultation_fee", 500),
         }
-        profile = DoctorProfile.objects.create(user=user, **profile_data)
+        profile = DoctorProfile.objects.create(user=user, is_approved=True, **profile_data)
+        return Response(DoctorProfileSerializer(profile).data, status=status.HTTP_201_CREATED)
+
+
+class AdminPendingDoctorsView(generics.ListAPIView):
+    """Admin: List users with role=doctor who have no DoctorProfile yet (pending approval)"""
+    serializer_class = UserSerializer
+    permission_classes = [IsAdminRole]
+
+    def get_queryset(self):
+        approved_user_ids = DoctorProfile.objects.values_list('user_id', flat=True)
+        return User.objects.filter(role='doctor').exclude(id__in=approved_user_ids).order_by('-date_joined')
+
+
+class AdminApproveDoctorView(APIView):
+    """Admin: Approve a registered doctor by creating their DoctorProfile"""
+    permission_classes = [IsAdminRole]
+
+    def post(self, request, pk):
+        try:
+            user = User.objects.get(pk=pk, role='doctor')
+        except User.DoesNotExist:
+            return Response({'error': 'Doctor user not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if hasattr(user, 'doctor_profile'):
+            return Response({'error': 'This doctor is already approved.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        profile_data = {
+            'specialization': request.data.get('specialization', 'general_physician'),
+            'license_number': request.data.get('license_number', f'LIC-{user.id}'),
+            'experience_years': request.data.get('experience_years', 0),
+            'hospital_name': request.data.get('hospital_name', 'HeartCare Medical Center'),
+            'consultation_fee': request.data.get('consultation_fee', 500),
+            'is_available': True,
+        }
+        profile = DoctorProfile.objects.create(user=user, is_approved=True, **profile_data)
         return Response(DoctorProfileSerializer(profile).data, status=status.HTTP_201_CREATED)
 
 
@@ -85,12 +127,25 @@ class DoctorAvailabilityView(generics.ListCreateAPIView):
 
 
 class DoctorPatientsView(generics.ListAPIView):
-    """Doctor: View assigned patients"""
+    """Doctor: View patients who have had any appointment with this doctor"""
     serializer_class = PatientProfileSerializer
     permission_classes = [IsDoctor]
 
     def get_queryset(self):
-        return PatientProfile.objects.filter(assigned_doctor=self.request.user)
+        from appointments.models import Appointment
+        try:
+            profile = DoctorProfile.objects.get(user=self.request.user)
+        except DoctorProfile.DoesNotExist:
+            return PatientProfile.objects.none()
+        # Include patients from appointments AND directly assigned ones
+        appt_patient_ids = Appointment.objects.filter(
+            doctor=profile
+        ).values_list('patient_id', flat=True).distinct()
+        direct_patient_ids = PatientProfile.objects.filter(
+            assigned_doctor=self.request.user
+        ).values_list('id', flat=True)
+        all_ids = list(set(list(appt_patient_ids) + list(direct_patient_ids)))
+        return PatientProfile.objects.filter(id__in=all_ids)
 
 
 class PrescriptionListCreateView(generics.ListCreateAPIView):
@@ -103,7 +158,23 @@ class PrescriptionListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         profile = DoctorProfile.objects.get(user=self.request.user)
-        serializer.save(doctor=profile)
+        prescription = serializer.save(doctor=profile)
+
+        # Notify patient that a prescription has been issued
+        try:
+            from patients.models import Notification
+            Notification.objects.create(
+                user=prescription.patient.user,
+                type="medicine",
+                title="New Prescription Issued",
+                message=(
+                    f"Dr. {profile} has issued a new prescription for you. "
+                    f"Diagnosis: {prescription.diagnosis[:80]}{'...' if len(prescription.diagnosis) > 80 else ''}. "
+                    f"Please log in to view your medications and download your prescription."
+                ),
+            )
+        except Exception:
+            pass  # Don't fail the prescription if notification fails
 
 
 class PrescriptionDetailView(generics.RetrieveUpdateDestroyAPIView):

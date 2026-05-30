@@ -23,6 +23,7 @@ class DoctorProfile(models.Model):
     consultation_fee = models.DecimalField(max_digits=10, decimal_places=2, default=500.00)
     bio = models.TextField(blank=True)
     is_available = models.BooleanField(default=True)
+    is_approved = models.BooleanField(default=False, help_text="Admin must approve before doctor appears in appointment booking")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
