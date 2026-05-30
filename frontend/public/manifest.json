@@ -1,0 +1,27 @@
+{
+  "name": "HeartCare AI",
+  "short_name": "HeartCare",
+  "description": "AI-powered cardiac risk prediction platform for patients and doctors.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/heart3d.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/heart3d.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["health", "medical"],
+  "lang": "en",
+  "dir": "ltr"
+}

@@ -1,27 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
 
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>HeartCare AI — Heart Disease Prediction</title>
-      <meta name="description" content="AI-powered heart disease prediction and healthcare management platform using 7 machine learning algorithms." />
-      <!-- Google Fonts: Inter + Space Grotesk -->
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-      <style>
-        html, body { height: 100%; margin: 0; }
-        #root { height: 100%; }
-        * { box-sizing: border-box; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
-      </style>
-    </head>
-    <body>
-      <div id="root"></div>
-      <script type="module" src="/src/main.tsx"></script>
-    </body>
-  </html>
-  
+    <!-- Primary Meta -->
+    <title>HeartCare AI — Heart Disease Prediction</title>
+    <meta name="description" content="AI-powered heart disease prediction and healthcare management platform using 7 machine learning algorithms — 98.5% accuracy, instant PDF reports, specialist consultations." />
+    <meta name="keywords" content="heart disease prediction, AI cardiology, cardiovascular risk, machine learning health, cardiac diagnosis" />
+    <meta name="author" content="HeartCare AI" />
+    <meta name="theme-color" content="#7c3aed" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- PWA / App Meta -->
+    <meta name="application-name" content="HeartCare AI" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HeartCare AI" />
+    <meta name="msapplication-TileColor" content="#7c3aed" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="HeartCare AI — Precision Cardiology Powered by AI" />
+    <meta property="og:description" content="Predict cardiovascular disease risk instantly using an ensemble of 7 ML algorithms. 98.5% accuracy, HIPAA-compliant, instant PDF reports." />
+    <meta property="og:image" content="/heart3d.png" />
+    <meta property="og:site_name" content="HeartCare AI" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="HeartCare AI — Precision Cardiology Powered by AI" />
+    <meta name="twitter:description" content="AI-powered cardiac risk prediction platform for patients and doctors." />
+    <meta name="twitter:image" content="/heart3d.png" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" href="/heart3d.png" />
+    <link rel="apple-touch-icon" href="/heart3d.png" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <style>
+      html, body { height: 100%; margin: 0; }
+      #root { height: 100%; }
+      * { box-sizing: border-box; }
+      /* Prevent FOUC */
+      body { background: #000; }
+      body.light-ready { background: #f5f7ff; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

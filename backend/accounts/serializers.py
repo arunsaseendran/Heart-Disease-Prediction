@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
-    password2 = serializers.CharField(write_only=True)
+    password2 = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = User
@@ -28,12 +28,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
-        if attrs["password"] != attrs["password2"]:
+        password2 = attrs.get("password2")
+        if password2 is not None and attrs["password"] != password2:
             raise serializers.ValidationError({"password": "Passwords do not match."})
         return attrs
 
     def create(self, validated_data):
-        validated_data.pop("password2")
+        validated_data.pop("password2", None)
         password = validated_data.pop("password")
         # Only admin can create doctor accounts via this route;
         # default role is patient unless explicitly set
