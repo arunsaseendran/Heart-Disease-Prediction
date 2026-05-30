@@ -1,0 +1,148 @@
+{
+  "results": {
+    "logistic_regression": {
+      "accuracy": 89.5,
+      "precision": 92.12,
+      "recall": 95.0,
+      "f1_score": 93.54,
+      "confusion_matrix": [
+        [
+          27,
+          13
+        ],
+        [
+          8,
+          152
+        ]
+      ],
+      "cv_mean": 90.25,
+      "cv_std": 1.92
+    },
+    "decision_tree": {
+      "accuracy": 93.0,
+      "precision": 95.06,
+      "recall": 96.25,
+      "f1_score": 95.65,
+      "confusion_matrix": [
+        [
+          32,
+          8
+        ],
+        [
+          6,
+          154
+        ]
+      ],
+      "cv_mean": 91.38,
+      "cv_std": 1.74
+    },
+    "random_forest": {
+      "accuracy": 94.5,
+      "precision": 93.57,
+      "recall": 100.0,
+      "f1_score": 96.68,
+      "confusion_matrix": [
+        [
+          29,
+          11
+        ],
+        [
+          0,
+          160
+        ]
+      ],
+      "cv_mean": 94.25,
+      "cv_std": 1.0
+    },
+    "svm": {
+      "accuracy": 89.5,
+      "precision": 90.64,
+      "recall": 96.88,
+      "f1_score": 93.66,
+      "confusion_matrix": [
+        [
+          24,
+          16
+        ],
+        [
+          5,
+          155
+        ]
+      ],
+      "cv_mean": 91.5,
+      "cv_std": 1.4
+    },
+    "knn": {
+      "accuracy": 85.0,
+      "precision": 88.24,
+      "recall": 93.75,
+      "f1_score": 90.91,
+      "confusion_matrix": [
+        [
+          20,
+          20
+        ],
+        [
+          10,
+          150
+        ]
+      ],
+      "cv_mean": 87.25,
+      "cv_std": 1.35
+    },
+    "naive_bayes": {
+      "accuracy": 90.5,
+      "precision": 90.75,
+      "recall": 98.12,
+      "f1_score": 94.29,
+      "confusion_matrix": [
+        [
+          24,
+          16
+        ],
+        [
+          3,
+          157
+        ]
+      ],
+      "cv_mean": 91.25,
+      "cv_std": 1.05
+    },
+    "xgboost": {
+      "accuracy": 96.0,
+      "precision": 95.78,
+      "recall": 99.38,
+      "f1_score": 97.55,
+      "confusion_matrix": [
+        [
+          33,
+          7
+        ],
+        [
+          1,
+          159
+        ]
+      ],
+      "cv_mean": 95.38,
+      "cv_std": 0.5
+    }
+  },
+  "best_model": "xgboost",
+  "trained_at": "2026-05-28T17:54:59.410015",
+  "dataset_size": 1000,
+  "features": [
+    "age",
+    "sex",
+    "chest_pain_type",
+    "resting_blood_pressure",
+    "cholesterol",
+    "fasting_blood_sugar",
+    "resting_ecg",
+    "max_heart_rate",
+    "exercise_induced_angina",
+    "st_depression",
+    "st_slope",
+    "num_major_vessels",
+    "thalassemia"
+  ]
+}
