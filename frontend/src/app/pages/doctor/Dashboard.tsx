@@ -41,7 +41,7 @@ export default function DoctorDashboard() {
         <div>
           <p className="hero-eyebrow" style={{ color: 'var(--brand-cyan)' }}>Practitioner Workspace</p>
           <h1 className="hero-title">
-            Welcome, Dr. {user?.last_name || user?.username}!
+            Welcome, Dr. {[user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.username}!
           </h1>
           <p className="hero-desc">
             Manage your patient roster, appointments, and issue electronic prescriptions from your digital clinical space.

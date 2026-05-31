@@ -73,9 +73,10 @@ class PredictView(APIView):
                 **result,
                 "recommendations": recs,
                 "prediction_id": prediction.id,
+                "algorithm_used": data.get("algorithm", "best"),
             })
 
-        return Response({**result, "recommendations": recs})
+        return Response({**result, "recommendations": recs, "algorithm_used": data.get("algorithm", "best")})
 
 
 class PredictionHistoryView(generics.ListAPIView):

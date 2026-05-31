@@ -13,7 +13,7 @@ import {
 } from "../../components/ui/select";
 
 const ALGORITHMS = [
-  { value: 'best', label: 'Ensemble Best Model (Highest Accuracy)' },
+  { value: 'best', label: 'Ensemble Best Model (XGBoost)' },
   { value: 'xgboost', label: 'XGBoost Classifier' },
   { value: 'random_forest', label: 'Random Forest Ensemble' },
   { value: 'decision_tree', label: 'Decision Tree Classifier' },
@@ -22,6 +22,10 @@ const ALGORITHMS = [
   { value: 'logistic_regression', label: 'Logistic Regression' },
   { value: 'knn', label: 'K-Nearest Neighbors (KNN)' },
 ];
+
+// Map algorithm key → display label
+const getAlgorithmLabel = (key: string) =>
+  ALGORITHMS.find(a => a.value === key)?.label || key;
 
 export default function PredictForm() {
   // Wizard Stages: 'form' -> 'loading' -> 'result'
@@ -499,11 +503,11 @@ export default function PredictForm() {
                     {result.risk_level} CARDIAC RISK
                   </span>
                   <span className="info-chip" style={{ fontSize: 10.5, padding: '3px 8px' }}>
-                    Algorithm: <span style={{ color: 'var(--brand-cyan)', textTransform: 'capitalize' }}>{result.algorithm_used}</span>
+                    Algorithm: <span style={{ color: 'var(--brand-cyan)' }}>{getAlgorithmLabel(result.algorithm_used || form.algorithm)}</span>
                   </span>
                 </div>
                 <h2 style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.025em' }}>
-                  {result.prediction_result === 1 ? 'Coronary Pathology Indicated' : 'No Coronary Pathology Detected'}
+                  {(result.prediction === 1 || result.has_disease) ? 'Coronary Pathology Indicated' : 'No Coronary Pathology Detected'}
                 </h2>
                 <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, maxWidth: 460 }}>
                   Diagnostic systems indicate high confidence in these findings based on ST slope patterns, blood vessels coloration, and rest ECG waveforms.
@@ -539,7 +543,7 @@ export default function PredictForm() {
                 <h3 className="section-title">Recommended Dietary Regimen</h3>
               </div>
               <ul style={{ paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                {(result.diet_recommendations || []).map((item: string, i: number) => (
+                {(result.recommendations?.diet || result.diet_recommendations || []).map((item: string, i: number) => (
                   <li key={i}>{item}</li>
                 ))}
               </ul>
@@ -552,7 +556,7 @@ export default function PredictForm() {
                 <h3 className="section-title">Lifestyle & Exercise Regimen</h3>
               </div>
               <ul style={{ paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                {(result.exercise_recommendations || []).map((item: string, i: number) => (
+                {(result.recommendations?.exercise || result.exercise_recommendations || []).map((item: string, i: number) => (
                   <li key={i}>{item}</li>
                 ))}
               </ul>
@@ -578,13 +582,13 @@ export default function PredictForm() {
             </div>
             
             <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              {result.alert_message || 'All general vitals match regular baseline values. Perform periodic checks and maintain healthy exercise habits.'}
+              {result.recommendations?.alert || result.alert_message || 'All general vitals match regular baseline values. Perform periodic checks and maintain healthy exercise habits.'}
             </p>
             
-            {result.smoking_advice && (
+            {(result.recommendations?.smoking_advice || result.smoking_advice) && (
               <div style={{ fontSize: 13, color: '#f87171', borderTop: '1px solid rgba(225,29,72,0.12)', paddingTop: 12, marginTop: 4, lineHeight: 1.5, display: 'flex', gap: 6 }}>
                 <Zap style={{ width: 14, height: 14, flexShrink: 0, marginTop: 1 }} />
-                <span><strong>Tobacco Recovery Protocol:</strong> {result.smoking_advice}</span>
+                <span><strong>Tobacco Recovery Protocol:</strong> {result.recommendations?.smoking_advice || result.smoking_advice}</span>
               </div>
             )}
           </div>

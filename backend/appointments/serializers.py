@@ -13,7 +13,9 @@ class AppointmentSerializer(serializers.ModelSerializer):
         read_only_fields = ["patient", "status", "doctor_notes", "created_at", "updated_at"]
 
     def get_patient_name(self, obj):
-        return str(obj.patient)
+        user = obj.patient.user
+        return user.get_full_name() or user.username
 
     def get_doctor_name(self, obj):
-        return str(obj.doctor)
+        user = obj.doctor.user
+        return user.get_full_name() or user.username

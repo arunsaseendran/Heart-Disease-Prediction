@@ -1,7 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../lib/auth';
 import { patientApi, authApi } from '../../../lib/api';
-import { User, Shield, Phone, Heart, Award, Save, CheckCircle2, AlertCircle } from 'lucide-react';
+import { User, Shield, Phone, Heart, Award, Save, CheckCircle2, AlertCircle, Droplets } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
+
+const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+
+// Small helper: asterisk for required fields
+const Req = () => <span style={{ color: 'var(--brand-rose)', marginLeft: 2 }}>*</span>;
+const Opt = () => <span style={{ fontSize: 10, color: 'var(--text-faint)', marginLeft: 4, fontWeight: 500 }}>(optional)</span>;
 
 export default function PatientProfile() {
   const { user, refreshUser } = useAuth();
@@ -41,7 +54,7 @@ export default function PatientProfile() {
         date_of_birth: user.date_of_birth || '',
         address: user.address || '',
       });
-      
+
       patientApi.profile()
         .then((r) => {
           const d = r.data;
@@ -54,7 +67,7 @@ export default function PatientProfile() {
             current_medications: d.current_medications || '',
           });
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   }, [user]);
 
@@ -65,16 +78,21 @@ export default function PatientProfile() {
     setError('');
 
     try {
-      // 1. Update Core User Details
+      // 1. Update Core User Details (sends JSON — backend now has JSONParser)
       await authApi.updateProfile(accountForm);
-      // 2. Update Patient Profile Details
+      // 2. Update Patient Clinical Profile
       await patientApi.updateProfile(clinicalForm);
-      
+
       await refreshUser();
       setSuccess(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'An error occurred while updating profile.');
+      const data = err.response?.data;
+      const msg =
+        data?.detail ||
+        (typeof data === 'object' ? Object.values(data).flat().join(' ') : null) ||
+        'An error occurred while updating profile.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -85,6 +103,9 @@ export default function PatientProfile() {
       <div>
         <h1 className="page-title">Profile Settings</h1>
         <p className="page-subtitle">Manage your personal details, emergency contacts, and active medical indicators</p>
+        <p style={{ fontSize: 11.5, color: 'var(--text-faint)', marginTop: 6 }}>
+          <span style={{ color: 'var(--brand-rose)' }}>*</span> Required fields &nbsp;·&nbsp; <span style={{ fontSize: 10, color: 'var(--text-faint)' }}>(optional)</span> Optional fields
+        </p>
       </div>
 
       {success && (
@@ -102,7 +123,7 @@ export default function PatientProfile() {
       )}
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        
+
         {/* Card 1: Account Identifiers */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div className="section-header">
@@ -112,22 +133,24 @@ export default function PatientProfile() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
             <div className="form-group">
-              <label className="form-label">First Name</label>
-              <input 
-                type="text" 
-                value={accountForm.first_name} 
-                onChange={(e) => setAccountForm({ ...accountForm, first_name: e.target.value })} 
+              <label className="form-label">First Name<Req /></label>
+              <input
+                type="text"
+                value={accountForm.first_name}
+                onChange={(e) => setAccountForm({ ...accountForm, first_name: e.target.value })}
                 className="form-input"
+                placeholder="Enter first name"
                 required
               />
             </div>
             <div className="form-group">
-              <label className="form-label">Last Name</label>
-              <input 
-                type="text" 
-                value={accountForm.last_name} 
-                onChange={(e) => setAccountForm({ ...accountForm, last_name: e.target.value })} 
+              <label className="form-label">Last Name<Req /></label>
+              <input
+                type="text"
+                value={accountForm.last_name}
+                onChange={(e) => setAccountForm({ ...accountForm, last_name: e.target.value })}
                 className="form-input"
+                placeholder="Enter last name"
                 required
               />
             </div>
@@ -135,56 +158,61 @@ export default function PatientProfile() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
             <div className="form-group">
-              <label className="form-label">Email Address</label>
-              <input 
-                type="email" 
-                value={accountForm.email} 
-                onChange={(e) => setAccountForm({ ...accountForm, email: e.target.value })} 
+              <label className="form-label">Email Address<Req /></label>
+              <input
+                type="email"
+                value={accountForm.email}
+                onChange={(e) => setAccountForm({ ...accountForm, email: e.target.value })}
                 className="form-input"
+                placeholder="you@example.com"
                 required
               />
             </div>
             <div className="form-group">
-              <label className="form-label">Phone Number</label>
-              <input 
-                type="text" 
-                value={accountForm.phone} 
-                onChange={(e) => setAccountForm({ ...accountForm, phone: e.target.value })} 
+              <label className="form-label">Phone Number<Opt /></label>
+              <input
+                type="text"
+                value={accountForm.phone}
+                onChange={(e) => setAccountForm({ ...accountForm, phone: e.target.value })}
                 className="form-input"
+                placeholder="+91 9876543210"
               />
             </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
             <div className="form-group">
-              <label className="form-label">Biological Gender</label>
-              <select 
-                value={accountForm.gender} 
-                onChange={(e) => setAccountForm({ ...accountForm, gender: e.target.value })} 
-                className="form-select"
-              >
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
+              <label className="form-label">Biological Gender<Req /></label>
+              <Select value={accountForm.gender} onValueChange={v => setAccountForm({ ...accountForm, gender: v })}>
+                <SelectTrigger className="form-select">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                  <SelectItem value="other">Other / Prefer not to say</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="form-group">
-              <label className="form-label">Date of Birth</label>
-              <input 
-                type="date" 
-                value={accountForm.date_of_birth} 
-                onChange={(e) => setAccountForm({ ...accountForm, date_of_birth: e.target.value })} 
+              <label className="form-label">Date of Birth<Req /></label>
+              <input
+                type="date"
+                value={accountForm.date_of_birth}
+                onChange={(e) => setAccountForm({ ...accountForm, date_of_birth: e.target.value })}
                 className="form-input"
+                required
               />
             </div>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Home Address</label>
-            <textarea 
-              value={accountForm.address} 
-              onChange={(e) => setAccountForm({ ...accountForm, address: e.target.value })} 
+            <label className="form-label">Home Address<Opt /></label>
+            <textarea
+              value={accountForm.address}
+              onChange={(e) => setAccountForm({ ...accountForm, address: e.target.value })}
               rows={2}
+              placeholder="Enter your residential address..."
               className="form-textarea"
             />
           </div>
@@ -194,42 +222,55 @@ export default function PatientProfile() {
         <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div className="section-header">
             <Shield style={{ width: 17, height: 17, color: 'var(--brand-cyan)' }} />
-            <h3 className="section-title">Clinical History & Parameters</h3>
+            <h3 className="section-title">Clinical History &amp; Parameters</h3>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
+            {/* Blood Group Dropdown */}
             <div className="form-group">
-              <label className="form-label">Blood Group</label>
-              <input 
-                type="text" 
-                value={clinicalForm.blood_group} 
-                onChange={(e) => setClinicalForm({ ...clinicalForm, blood_group: e.target.value })} 
-                placeholder="e.g. O+, A-"
+              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Droplets style={{ width: 11, height: 11, color: 'var(--brand-rose)' }} />
+                Blood Group<Opt />
+              </label>
+              <Select
+                value={clinicalForm.blood_group || '__none__'}
+                onValueChange={v => setClinicalForm({ ...clinicalForm, blood_group: v === '__none__' ? '' : v })}
+              >
+                <SelectTrigger className="form-select">
+                  <SelectValue placeholder="Select blood group" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— Unknown / Not set —</SelectItem>
+                  {BLOOD_GROUPS.map(bg => (
+                    <SelectItem key={bg} value={bg}>{bg}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">
+                <Phone style={{ width: 10, height: 10, display: 'inline', marginRight: 4 }} />
+                Emergency Contact Name<Opt />
+              </label>
+              <input
+                type="text"
+                value={clinicalForm.emergency_contact_name}
+                onChange={(e) => setClinicalForm({ ...clinicalForm, emergency_contact_name: e.target.value })}
                 className="form-input"
+                placeholder="Full name of contact"
               />
             </div>
             <div className="form-group">
               <label className="form-label">
                 <Phone style={{ width: 10, height: 10, display: 'inline', marginRight: 4 }} />
-                Emergency Contact Name
+                Emergency Phone Number<Opt />
               </label>
-              <input 
-                type="text" 
-                value={clinicalForm.emergency_contact_name} 
-                onChange={(e) => setClinicalForm({ ...clinicalForm, emergency_contact_name: e.target.value })} 
+              <input
+                type="text"
+                value={clinicalForm.emergency_contact_phone}
+                onChange={(e) => setClinicalForm({ ...clinicalForm, emergency_contact_phone: e.target.value })}
                 className="form-input"
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">
-                <Phone style={{ width: 10, height: 10, display: 'inline', marginRight: 4 }} />
-                Emergency Phone Number
-              </label>
-              <input 
-                type="text" 
-                value={clinicalForm.emergency_contact_phone} 
-                onChange={(e) => setClinicalForm({ ...clinicalForm, emergency_contact_phone: e.target.value })} 
-                className="form-input"
+                placeholder="+91 9876543210"
               />
             </div>
           </div>
@@ -238,11 +279,11 @@ export default function PatientProfile() {
             <div className="form-group">
               <label className="form-label">
                 <Heart style={{ width: 10, height: 10, display: 'inline', marginRight: 4 }} />
-                Cardiovascular History
+                Cardiovascular History<Opt />
               </label>
-              <textarea 
-                value={clinicalForm.medical_history} 
-                onChange={(e) => setClinicalForm({ ...clinicalForm, medical_history: e.target.value })} 
+              <textarea
+                value={clinicalForm.medical_history}
+                onChange={(e) => setClinicalForm({ ...clinicalForm, medical_history: e.target.value })}
                 placeholder="e.g. Chronic Hypertension, family cardiac disorders, previous chest surgery details..."
                 className="form-textarea"
                 rows={3}
@@ -251,11 +292,11 @@ export default function PatientProfile() {
             <div className="form-group">
               <label className="form-label">
                 <Award style={{ width: 10, height: 10, display: 'inline', marginRight: 4 }} />
-                Allergies & Sensitivities
+                Allergies &amp; Sensitivities<Opt />
               </label>
-              <textarea 
-                value={clinicalForm.allergies} 
-                onChange={(e) => setClinicalForm({ ...clinicalForm, allergies: e.target.value })} 
+              <textarea
+                value={clinicalForm.allergies}
+                onChange={(e) => setClinicalForm({ ...clinicalForm, allergies: e.target.value })}
                 placeholder="e.g. Penicillin, latex, particular foods, contrast dye..."
                 className="form-textarea"
                 rows={3}
@@ -264,10 +305,10 @@ export default function PatientProfile() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Active Cardiovascular Therapy Medications</label>
-            <textarea 
-              value={clinicalForm.current_medications} 
-              onChange={(e) => setClinicalForm({ ...clinicalForm, current_medications: e.target.value })} 
+            <label className="form-label">Active Cardiovascular Therapy Medications<Opt /></label>
+            <textarea
+              value={clinicalForm.current_medications}
+              onChange={(e) => setClinicalForm({ ...clinicalForm, current_medications: e.target.value })}
               placeholder="e.g. Aspirin 75mg once daily, Atorvastatin 20mg at night..."
               className="form-textarea"
               rows={2}
@@ -277,8 +318,8 @@ export default function PatientProfile() {
 
         {/* Form Action */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loading}
             className="btn btn-primary btn-lg"
             style={{ gap: 8 }}
